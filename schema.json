@@ -7,7 +7,7 @@
     },
     "servers": [
       {
-        "url": "RENDER-URL-HERE"
+        "url": "https://kornilova-1.onrender.com"
       }
     ],
     "paths": {
