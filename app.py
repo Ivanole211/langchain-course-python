@@ -50,12 +50,16 @@ async def get_context(
         input=[query_data.query], model="text-embedding-ada-002"
     )
     embedding = res.data[0].embedding
-    # Search for matching Vectors
-    results = index.query(embedding, top_k=6, include_metadata=True).to_dict()
-    # Filter out metadata fron search result
+
+    # Search for matching Vectors using keyword arguments
+    results = index.query(vector=embedding, top_k=6, include_metadata=True).to_dict()
+
+    # Filter out metadata from search result
     context = [match["metadata"]["text"] for match in results["matches"]]
+
     # Return context
     return context
+
 
 # @app.get("/")
 # async def get_context(query: str = None, credentials: HTTPAuthorizationCredentials = Depends(validate_token)):
