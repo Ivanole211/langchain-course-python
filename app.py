@@ -6,26 +6,26 @@ from fastapi import FastAPI, HTTPException, Security, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
 
-import pinecone
+from pinecone import Pinecone
 
 load_dotenv()
 
-# uvicorn app:app --host 0.0.0.0 --port 10000
 app = FastAPI()
 
 # Setup environment variables
 openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 pinecone_api_key = os.getenv("PINECONE_API_KEY")
-environment = os.getenv("PINECONE_ENV")
+pinecone_env = os.getenv("PINECONE_ENV")
 index_name = os.getenv("PINECONE_INDEX")
 
-# Initialize pinecone client
-pinecone.init(api_key=pinecone_api_key, environment=environment)
-index = pinecone.Index(index_name)
+# Initialize pinecone client with the specified environment
+pc = Pinecone(api_key=pinecone_api_key, environment=pinecone_env)
+
+# Access existing index
+index = pc.Index(name=index_name)
 
 # Middleware to secure HTTP endpoint
 security = HTTPBearer()
-
 
 def validate_token(
     http_auth_credentials: HTTPAuthorizationCredentials = Security(security),
@@ -37,10 +37,8 @@ def validate_token(
     else:
         raise HTTPException(status_code=403, detail="Invalid authentication scheme")
 
-
 class QueryModel(BaseModel):
     query: str
-
 
 @app.post("/")
 async def get_context(
@@ -56,9 +54,8 @@ async def get_context(
     results = index.query(embedding, top_k=6, include_metadata=True).to_dict()
     # Filter out metadata fron search result
     context = [match["metadata"]["text"] for match in results["matches"]]
-    # Retrun context
+    # Return context
     return context
-
 
 # @app.get("/")
 # async def get_context(query: str = None, credentials: HTTPAuthorizationCredentials = Depends(validate_token)):
