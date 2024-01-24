@@ -51,19 +51,19 @@ async def get_context(
     )
     embedding = res.data[0].embedding
 
-    # Search for matching Vectors using keyword arguments
-    results = index.query(vector=embedding, top_k=6, include_metadata=True).to_dict()
+    # Поиск соответствующих векторов в пространстве имен 'QA'
+    results_qa = index.query(vector=embedding, top_k=5, namespace="QA", include_metadata=True).to_dict()
 
-    # Filter out metadata from search result
-    context = []
-    for match in results.get("matches", []):
-        if "metadata" in match and "key" in match["metadata"] and "text" in match["metadata"]:
-            namespace = match["metadata"]["key"].split(":")[0]
-            if namespace in ["QA", "Message"]:
-                context.append(match["metadata"]["text"])
+    # Поиск соответствующих векторов в пространстве имен 'Message'
+    results_message = index.query(vector=embedding, top_k=5, namespace="Message", include_metadata=True).to_dict()
 
-    # Return context
+    # Объединение результатов из обоих запросов
+    context = [match["metadata"]["text"] for match in results_qa["matches"]]
+    context += [match["metadata"]["text"] for match in results_message["matches"]]
+
+    # Возвращение контекста
     return context
+
 
 
 
