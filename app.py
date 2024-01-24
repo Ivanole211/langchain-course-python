@@ -55,10 +55,16 @@ async def get_context(
     results = index.query(vector=embedding, top_k=6, include_metadata=True).to_dict()
 
     # Filter out metadata from search result
-    context = [match["metadata"]["text"] for match in results["matches"]]
+    context = []
+    for match in results.get("matches", []):
+        if "metadata" in match and "key" in match["metadata"] and "text" in match["metadata"]:
+            namespace = match["metadata"]["key"].split(":")[0]
+            if namespace in ["QA", "Message"]:
+                context.append(match["metadata"]["text"])
 
     # Return context
     return context
+
 
 
 # @app.get("/")
