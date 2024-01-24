@@ -57,12 +57,15 @@ async def get_context(
     # Поиск соответствующих векторов в пространстве имен 'Message'
     results_message = index.query(vector=embedding, top_k=5, namespace="Message", include_metadata=True).to_dict()
 
-    # Объединение результатов из обоих запросов
-    context = [match["metadata"]["text"] for match in results_qa["matches"]]
-    context += [match["metadata"]["text"] for match in results_message["matches"]]
+    # Формирование результатов из пространства имен 'QA'
+    context_qa = "\n".join([match["metadata"]["text"] for match in results_qa["matches"]])
 
-    # Возвращение контекста
-    return context
+    # Формирование результатов из пространства имен 'Message'
+    context_message = "\n".join([match["metadata"]["text"] for match in results_message["matches"]])
+
+    # Форматированный вывод результатов
+    return f"Возможный ответ:\n{context_qa}\n\nВозможный стиль ответа:\n{context_message}"
+
 
 
 
