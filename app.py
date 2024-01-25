@@ -52,10 +52,10 @@ async def get_context(
     embedding = res.data[0].embedding
 
     # Поиск соответствующих векторов в пространстве имен 'QA'
-    results_qa = index.query(vector=embedding, top_k=5, namespace="QA", include_metadata=True).to_dict()
+    results_qa = index.query(vector=embedding, top_k=2, namespace="QA", include_metadata=True).to_dict()
 
     # Поиск соответствующих векторов в пространстве имен 'Message'
-    results_message = index.query(vector=embedding, top_k=5, namespace="Message", include_metadata=True).to_dict()
+    results_message = index.query(vector=embedding, top_k=1, namespace="Message", include_metadata=True).to_dict()
 
     # Формирование результатов из пространства имен 'QA'
     context_qa = "\n".join([match["metadata"]["text"] for match in results_qa["matches"]])
